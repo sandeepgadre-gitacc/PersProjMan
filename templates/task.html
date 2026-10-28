@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+
+
+{% block sidebar %}
+    <div class="mt-auto">
+        <p class="small">Welcome {{ session["username"]|capitalize }}!</p>
+        <hr>
+    </div>
+
+    <h3>Quick Links</h3>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link active" href="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/createproject/new/0">New Project</a>
+        </li>
+    </ul>
+
+    <h5 class="mt-4 mb-2">Summary</h5>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Total Projects</div>
+        <div class="col-auto fw-bold">: {{ totalprojects }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Total Tasks</div>
+        <div class="col-auto fw-bold">: {{ completedtasks + pendingtasks }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Completed Tasks</div>
+        <div class="col-auto fw-bold">: {{ completedtasks }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Pending Tasks</div>
+        <div class="col-auto fw-bold">: {{ pendingtasks }}</div>
+    </div>
+
+    <div class="mt-auto">
+        <hr>
+        <a href="/logout" class="btn btn-outline-danger btn-sm w-100">Logout</a>
+    </div>
+
+{% endblock %}
+
+{% block css %}.
+    <style>
+        .areacard button {
+            width: auto !important;
+            padding: 8px 20px;
+            margin-right: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="areawrapper">
+        <div class="areacard">
+            <strong style="color: blue;">Task</strong>
+                {% if operate == 'view' %}
+                    <form action="/project/{{ projoperate }}/{{ projectid }}">
+                {% elif operate == 'new' %}
+                    <form action="/createupdatetask/{{ projectid }}/{{ operate }}/0/{{ projoperate }}" method="post">
+                {% else %}
+                    <form action="/createupdatetask/{{ projectid }}/{{ operate }}/{{ task.taskid }}/{{ projoperate }}" method="post">
+                {% endif %}
+
+                <label>Task Title</label>
+                <input type="text" name="title"
+                value="{{ task.title if task else '' }}"
+                {{ 'readonly' if operate == 'view' else '' }}
+                {% if operate == 'new' %} placeholder="Task Title" {% endif %}
+                >
+
+                <label>Description</label>
+                <input type="text" name="taskdesc"
+                value="{{ task.taskdesc if task else '' }}"
+                {{ 'readonly' if operate == 'view' else '' }}
+                {% if operate == 'new' %} placeholder="Description" {% endif %}
+                >
+
+                <div class="row mb-3">
+                    <!-- Priority -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Priority</label>
+                        <select name="taskpriority"
+                                class="form-select"
+                                {{ 'disabled' if operate == 'view' else '' }}>
+                            <option value="Low" {{ 'selected' if task.taskpriority == 'Low' else '' }}>Low</option>
+                            <option value="Medium" {{ 'selected' if task.taskpriority == 'Medium' else '' }}>Medium</option>
+                            <option value="High" {{ 'selected' if task.taskpriority == 'High' else '' }}>High</option>
+                        </select>
+                    </div>
+                    <!-- Status -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="taskstatus"
+                                class="form-select"
+                                {{ 'disabled' if operate == 'view' else '' }}>
+
+                            <option value="Todo"
+                                {{ 'selected' if (operate == 'new' or task.taskstatus == 'Todo') else '' }}>
+                                Todo
+                            </option>
+
+                            <option value="InProgress"
+                                {{ 'selected' if task.taskstatus == 'InProgress' else '' }}>
+                                InProgress
+                            </option>
+
+                            <option value="Done"
+                                {{ 'selected' if task.taskstatus == 'Done' else '' }}>
+                                Done
+                            </option>
+
+                        </select>
+                    </div>
+                    <!-- Due Date -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Due Date</label>
+                        <input type="date"
+                            class="form-control"
+                            name="duedate"
+                            value="{{ task.duedate if task else '' }}"
+                            {{ 'readonly' if operate == 'view' else '' }}>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('project', operate=projoperate, projectid=projectid) }}" class="btn btn-secondary">
+                    Go Back
+                </a>
+
+                {% if operate == 'view' %}
+                    <button type="submit">Close</button>
+                {% else %}
+                    <button type="submit">Submit</button>
+                {% endif %}
+
+            </form>
+        </div>
+    </div>
+{% endblock %}

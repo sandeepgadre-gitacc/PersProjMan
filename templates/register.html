@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block css %}
+    <style>
+        /* 1. Center the entire card on the page */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50vh; /* Takes up half the vertical screen */
+        }
+
+        /* 2. The Card itself */
+        .login-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            background-color: #ffffff;
+        }
+
+        /* 3. Spacing for the Title */
+        .login-card strong {
+            display: block;
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
+
+        /* 4. Professional Input Styling */
+        .login-card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px; /* Spacing between lines */
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+        }
+
+        /* 5. The "Action" Button */
+        .login-card button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .right-align-label {
+            text-align: right; /* Aligns the text to the right within that width */
+        }
+
+        .login-card button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="login-wrapper">
+        <div class="login-card">
+            <strong style="color: blue;">Register yourself</strong>
+            <form action="/register" method="post">
+                <input autocomplete="off" autofocus name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="confirmation" placeholder="Confirm Password" required>
+                <input name="email" placeholder="Email" required>
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

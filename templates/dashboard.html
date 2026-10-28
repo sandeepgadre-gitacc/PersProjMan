@@ -1,0 +1,199 @@
+{% extends "layout.html" %}
+
+
+{% block sidebar %}
+    <div class="mt-auto">
+        <p class="small">Welcome {{ session["username"]|capitalize }}!</p>
+        <hr>
+    </div>
+
+    <h3>Quick Links</h3>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link active" href="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/createproject/new/0">New Project</a>
+        </li>
+    </ul>
+
+    <h5 class="mt-4 mb-2">Summary</h5>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Total Projects</div>
+        <div class="col-auto fw-bold">: {{ totalprojects }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Total Tasks</div>
+        <div class="col-auto fw-bold">: {{ completedtasks + pendingtasks }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Completed Tasks</div>
+        <div class="col-auto fw-bold">: {{ completedtasks }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Pending Tasks</div>
+        <div class="col-auto fw-bold">: {{ pendingtasks }}</div>
+    </div>
+
+    <div class="mt-auto">
+        <hr>
+        <a href="/logout" class="btn btn-outline-danger btn-sm w-100">Logout</a>
+    </div>
+
+{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block body %}
+
+    <div class="row mt-3">
+        <div class="col-md-7">
+            <div class="list-group shadow-sm mb-4" style="max-width: 800px;max-height: 250px;">
+                <h5 class="mt-2 mb-2">Project Progress</h5>
+                {% for project in projectprogress %}
+                    {% set percent = (project.progcompleted_tasks / project.progtotal_tasks * 100) | round if project.progtotal_tasks > 0 else 0 %}
+                    <div class="list-group-item py-1">
+                        <div class="d-flex align-items-center">
+                            <div class="fw-bold text-dark" style="width: 400px;">
+                                {{ project.projectname }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="progress" style="height: 15px; background-color: #e3f2fd;" role="progressbar" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar progress-bar-striped {{ 'bg-success' if percent == 100 else 'bg-primary' }}"
+                                        style="width: {{ percent }}%">
+                                        {% if percent > 15 %}{{ percent }}%{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ms-3 text-muted small" style="width: 50px; text-align: right;">
+                                {{ project.progcompleted_tasks }}/{{ project.progtotal_tasks }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Right side: Task Status Overview -->
+        <div class="col-md-5">
+            <h5 class="mt-2 mb-2">Task Status Overview</h5>
+            <div class="card p-3 shadow-sm">
+                <canvas id="taskChart" style="height:250px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <h5 class="mb-2">Tasks Overdue Or Due Today</h5>
+            <div class="list-group shadow-sm mb-4">
+                {% for task in overdue %}
+                    <div class="list-group-item py-1 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-dark">{{ task.title }}</span>
+                        <span class="badge bg-danger rounded-pill">Due: {{ task.duedate }}</span>
+                    </div>
+                {% else %}
+                    <div class="list-group-item text-center text-muted py-3">
+                        No upcoming tasks 🎉
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h5 class="mb-2">Tasks due soon</h5>
+            <div class="list-group shadow-sm mb-4">
+                {% for task in duesoon %}
+                    <div class="list-group-item py-1 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-dark">{{ task.title }}</span>
+                        <span class="badge bg-warning rounded-pill">Due: {{ task.duedate }}</span>
+                    </div>
+                {% else %}
+                    <div class="list-group-item text-center text-muted py-3">
+                        No upcoming tasks 🎉
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <h5 class="mt-5 mb-3">Projects</h5>
+    <table class="mytab">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Start Date</th>
+                <th>Due Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.projectname }}</td>
+                <td>{{ project.startdate }}</td>
+                <td>{{ project.duedate }}</td>
+                <td>
+                    <a href="/project/view/{{ project.projectid }}" class="view-link">
+                        View
+                    </a>
+                    <form action="/project/update/{{ project.projectid }}" method="post" style="display:inline;">
+                        <button type="submit" class="update-link">
+                            Modify
+                        </button>
+                    </form>
+                    <form action="/deleteproject/{{ project.projectid }}" method="post" style="display:inline;">
+                        <button type="submit" class="delete-link" onclick="return confirm('Are you sure?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+                <tr>
+                    <td colspan=5>No Project Created</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/createproject/new/0">Create New Project</a>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const ctx = document.getElementById('taskChart');
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Todo', 'InProgress', 'Done'],
+                datasets: [{
+                    data: [{{ statcount.todo }}, {{ statcount.inprog }}, {{ statcount.done }}],
+                    backgroundColor: [
+                        '#f39c12',
+                        '#3498db',
+                        '#2ecc71'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: 5
+                },
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: { size: 10 },
+                            padding: 5
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}
+

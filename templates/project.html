@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+
+{% block sidebar %}
+    <div class="mt-auto">
+        <p class="small">Welcome {{ session["username"]|capitalize }}!</p>
+        <hr>
+    </div>
+
+    <h3>Quick Links</h3>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link active" href="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/createproject/new/0">New Project</a>
+        </li>
+    </ul>
+
+    <h5 class="mt-4 mb-2">Summary</h5>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Total Projects</div>
+        <div class="col-auto fw-bold">: {{ totalprojects }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Total Tasks</div>
+        <div class="col-auto fw-bold">: {{ completedtasks + pendingtasks }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Completed Tasks</div>
+        <div class="col-auto fw-bold">: {{ completedtasks }}</div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-8 col-md-6">Pending Tasks</div>
+        <div class="col-auto fw-bold">: {{ pendingtasks }}</div>
+    </div>
+
+    <div class="mt-auto">
+        <hr>
+        <a href="/logout" class="btn btn-outline-danger btn-sm w-100">Logout</a>
+    </div>
+
+
+
+{% endblock %}
+
+{% block css %}
+    <style>
+        .form-action-btn {
+            width: auto !important;
+            padding: 8px 20px;
+            margin-right: 10px;
+        }
+    </style>
+
+{% endblock %}
+
+
+{% block body %}
+    <div class="areawrap">
+        <div class="areacard">
+            <strong style="color: blue;">Project</strong>
+
+            {% if operate == 'view' %}
+                <form id="outform" action="/dashboard">
+            {% elif operate == 'update' %}
+                <form id="outform" action="/createproject/update/{{ project.projectid }}" method="post">
+            {% else %}
+                <form id="outform" action="/createproject/new/0" method="post">
+            {% endif %}
+            <label>Name</label>
+            <input type="text" name="name"
+                value="{{ project.projectname if project else '' }}"
+                {{ 'readonly' if operate == 'view' else '' }}
+                {% if operate == 'view' %} placeholder="Project Name" {% endif %}
+            >
+            <label>Start Date</label>
+            <input type="date" name="startdate"
+            value="{{ project.startdate if project else '' }}"
+                {{ 'readonly' if operate == 'view' else '' }}
+            >
+            <label>Due Date</label>
+            <input type="date" name="duedate"
+            value="{{ project.duedate if project else '' }}"
+            {{ 'readonly' if operate == 'view' else '' }}
+            >
+            </form>
+
+            <table class="mytab">
+                <thead>
+                    <tr>
+                        <!-- <th>Task ID</th> -->
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Due Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <!-- <td>{{ task.taskid }}</td> -->
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.taskstatus }}</td>
+                        <td>{{ task.taskpriority }}</td>
+                        <td>{{ task.duedate }}</td>
+                        <td>
+                            <div class="button-group">
+                                <a href="/createupdatetask/{{ project.projectid }}/view/{{ task.taskid }}/{{ operate }}" class="view-link">View</a>
+                                <a href="/createupdatetask/{{ project.projectid }}/update/{{ task.taskid }}/{{ operate }}" class="update-link">Modify</a>
+
+                                <form action="/deletetask/{{ project.projectid }}/{{ task.taskid }}" method="post" style="display:inline;">
+                                    <button type="submit" class="delete-link" onclick="return confirm('Are you sure?')">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan=4>No Task Created</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <!-- Link to Add New Task -->
+            {% if operate == 'update' %}
+                <div style="margin: 15px 0;">
+                    <a href="/createupdatetask/{{ project.projectid }}/new/0/{{ operate }}">Add Task</a>
+                </div>
+            {% endif %}
+
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                Go Back
+            </a>
+
+            {% if operate == 'view' %}
+                <button type="submit" form="outform" class="form-action-btn">Close</button>
+            {% else %}
+                <button type="submit" form="outform" class="form-action-btn">Submit</button>
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock %}
+
+
